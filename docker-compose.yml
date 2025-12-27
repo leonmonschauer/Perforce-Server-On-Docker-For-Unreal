@@ -14,11 +14,11 @@ services:
       - "1666:1666"
     environment:
       - P4PORT=ssl:1666
-      - P4SSLDIR=/data/p4depot/ssl
-      - P4ROOT=/data/p4depot
-      - P4USER=admin
-      - P4USER=p4admin
+      - P4SSLDIR=/data/p4depot/root/ssl
+      - P4ROOT=/data/p4depot/root
+      - P4USER=perforce
       - P4PASSWD=pass12349ers!
+      - CASE_INSENSITIVE=1
     build:
       context: .
       dockerfile: Dockerfile
