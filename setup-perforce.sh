@@ -2,7 +2,7 @@
 set +e
 export NAME="${NAME:-p4depot}"
 export CASE_INSENSITIVE="${CASE_INSENSITIVE:-1}"
-export P4ROOT="${P4ROOT:-${DATAVOLUME}/${NAME}}"
+export P4ROOT="${P4ROOT:-${DATAVOLUME}/${NAME}/root}"
 export P4PORT="${P4PORT:-ssl:1666}"
 
 # Guard against accidental double-root paths like /data/p4depot/root/root.
