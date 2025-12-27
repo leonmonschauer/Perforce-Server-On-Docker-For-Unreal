@@ -1,7 +1,7 @@
 #!/bin/bash
 set +e
 export NAME="${NAME:-p4depot}"
-export CASE_INSENSITIVE="${CASE_INSENSITIVE:-0}"
+export CASE_INSENSITIVE="${CASE_INSENSITIVE:-1}"
 export P4ROOT="${P4ROOT:-${DATAVOLUME}/${NAME}}"
 export P4PORT="${P4PORT:-ssl:1666}"
 
