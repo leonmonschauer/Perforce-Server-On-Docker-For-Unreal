@@ -2,12 +2,17 @@
 set +e
 export NAME="${NAME:-p4depot}"
 export CASE_INSENSITIVE="${CASE_INSENSITIVE:-1}"
-export P4ROOT="${P4ROOT:-${DATAVOLUME}/${NAME}/root}"
+export P4ROOT="${P4ROOT:-${DATAVOLUME}/${NAME}}"
 export P4PORT="${P4PORT:-ssl:1666}"
 
-# Guard against accidental double-root paths like /data/p4depot/root/root.
-if [ "$(basename "$P4ROOT")" = "root" ] && [ "$(basename "$(dirname "$P4ROOT")")" = "root" ]; then
-    P4ROOT="$(dirname "$P4ROOT")"
+# Prefer a root subdir if no db exists yet at P4ROOT.
+if [ ! -f "$P4ROOT/db.config" ]; then
+    if [ -f "$P4ROOT/root/db.config" ]; then
+        P4ROOT="$P4ROOT/root"
+    else
+        P4ROOT="$P4ROOT/root"
+        mkdir -p "$P4ROOT"
+    fi
 fi
 
 
@@ -68,6 +73,34 @@ fi
 if ! p4dctl list 2>/dev/null | grep -q $NAME; then
     /opt/perforce/sbin/configure-helix-p4d.sh $NAME -n -p $P4PORT -r $P4ROOT -u $P4USER -P "${P4PASSWD}" $CASE_FLAG
 fi
+
+CONF_DIR="$DATAVOLUME/etc/p4dctl.conf.d"
+mkdir -p "$CONF_DIR"
+P4D_FLAGS=""
+if [ "$CASE_INSENSITIVE" = "1" ]; then
+    P4D_FLAGS="-C1"
+elif [ "$CASE_INSENSITIVE" = "0" ]; then
+    P4D_FLAGS="-C0"
+fi
+
+cat > "$CONF_DIR/$NAME.conf" <<EOF
+p4d $NAME
+{
+    Owner    =  perforce
+    Execute  =  /opt/perforce/sbin/p4d
+    Umask    =  077
+    Enabled  =  true
+    Environment
+    {
+        P4ROOT    =     $P4ROOT
+        P4SSLDIR  =     $P4SSLDIR
+        P4PORT    =     $P4PORT
+        P4D_FLAGS =     $P4D_FLAGS
+        PATH      =     /bin:/usr/bin:/usr/local/bin:/opt/perforce/bin:/opt/perforce/sbin
+        MAINTENANCE =   true
+    }
+}
+EOF
 
 # Start the Perforce server
 p4dctl start -t p4d $NAME
