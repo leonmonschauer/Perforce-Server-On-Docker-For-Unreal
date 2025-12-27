@@ -5,6 +5,11 @@ export CASE_INSENSITIVE="${CASE_INSENSITIVE:-1}"
 export P4ROOT="${P4ROOT:-${DATAVOLUME}/${NAME}}"
 export P4PORT="${P4PORT:-ssl:1666}"
 
+# Guard against accidental double-root paths like /data/p4depot/root/root.
+if [ "$(basename "$P4ROOT")" = "root" ] && [ "$(basename "$(dirname "$P4ROOT")")" = "root" ]; then
+    P4ROOT="$(dirname "$P4ROOT")"
+fi
+
 
 # Ensure SSL directory exists
 SSL_DIR="${P4ROOT}/ssl"
