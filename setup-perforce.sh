@@ -2,7 +2,8 @@
 set +e
 export NAME="${NAME:-p4depot}"
 export CASE_INSENSITIVE="${CASE_INSENSITIVE:-0}"
-export P4ROOT="${DATAVOLUME}/${NAME}"
+export P4ROOT="${P4ROOT:-${DATAVOLUME}/${NAME}}"
+export P4PORT="${P4PORT:-ssl:1666}"
 
 
 # Ensure SSL directory exists
@@ -45,15 +46,22 @@ if [ -z "$P4PASSWD" ]; then
 fi
 
 # This is hardcoded in configure-helix-p4d.sh :(
-P4SSLDIR="$P4ROOT/ssl"
+export P4SSLDIR="${P4SSLDIR:-$P4ROOT/ssl}"
 
 for DIR in $P4ROOT $P4SSLDIR; do
     mkdir -m 0700 -p $DIR
     chown perforce:perforce $DIR
 done
 
+CASE_FLAG=""
+if [ "$CASE_INSENSITIVE" = "1" ]; then
+    CASE_FLAG="--case 1"
+elif [ "$CASE_INSENSITIVE" = "0" ]; then
+    CASE_FLAG="--case 0"
+fi
+
 if ! p4dctl list 2>/dev/null | grep -q $NAME; then
-    /opt/perforce/sbin/configure-helix-p4d.sh $NAME -n -p $P4PORT -r $P4ROOT -u $P4USER -P "${P4PASSWD}" --case 1 # Forcing case insensitive as it is recommended for Unreal projects
+    /opt/perforce/sbin/configure-helix-p4d.sh $NAME -n -p $P4PORT -r $P4ROOT -u $P4USER -P "${P4PASSWD}" $CASE_FLAG
 fi
 
 # Start the Perforce server
@@ -142,4 +150,3 @@ if [ "$P4PASSWD" == "pass12349ers!" ]; then
 fi
 
 # exec /usr/bin/p4web -U perforce -u $P4USER -b -p $P4PORT -P "$P4PASSWD" -w 8080
-
