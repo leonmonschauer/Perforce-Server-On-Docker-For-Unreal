@@ -16,9 +16,9 @@ services:
       - P4PORT=ssl:1666
       - P4SSLDIR=/data/p4depot/ssl
       - P4ROOT=/data/p4depot
-      - P4USER=perforce
+      - P4USER=admin
+      - P4USER=p4admin
       - P4PASSWD=pass12349ers!
-      - CASE_INSENSITIVE=1
     build:
       context: .
       dockerfile: Dockerfile
